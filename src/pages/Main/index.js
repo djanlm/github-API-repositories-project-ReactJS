@@ -11,6 +11,7 @@ export default class Main extends Component {
     newRepo: '',
     repositories: [],
     loading: false,
+    error: false,
   };
 
   // load data from localstorage
@@ -38,21 +39,35 @@ export default class Main extends Component {
     e.preventDefault();
 
     this.setState({ loading: true });
-    const { newRepo, repositories } = this.state;
+    try {
+      const { newRepo, repositories } = this.state;
+      if (newRepo === '')
+        throw new Error('Você precisa indicar um repositório');
 
-    const response = await api.get(`/repos/${newRepo}`);
-    const data = {
-      name: response.data.full_name,
-    };
-    this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
-      loading: false,
-    });
+      if (repositories.find(repo => newRepo === repo.name)) {
+        throw new Error('Repositório duplicado');
+      }
+      const response = await api.get(`/repos/${newRepo}`);
+
+      const data = {
+        name: response.data.full_name,
+      };
+
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+        loading: false,
+        error: false,
+      });
+    } catch (error) {
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
   render() {
-    const { newRepo, loading, repositories } = this.state;
+    const { newRepo, loading, repositories, error } = this.state;
     return (
       <Container>
         <h1>
@@ -60,7 +75,7 @@ export default class Main extends Component {
           Repositórios
         </h1>
 
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={error.toString()}>
           <input
             type="text"
             placeholder="Add repository"
@@ -68,7 +83,7 @@ export default class Main extends Component {
             onChange={this.handleInputChange}
           />
 
-          <SubmitButton loading={loading}>
+          <SubmitButton loading={loading.toString()}>
             {loading ? (
               <FaSpinner color="#FFF" />
             ) : (
