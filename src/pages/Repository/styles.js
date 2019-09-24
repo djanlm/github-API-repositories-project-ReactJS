@@ -41,9 +41,64 @@ export const Owner = styled.header`
   }
 `;
 
+export const FilterDiv = styled.div`
+  padding: 20px;
+  margin-top: 20px;
+  display: flex;
+  label {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    margin-right: 30px;
+    cursor: pointer;
+    font-size: 15px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    input {
+      opacity: 0;
+      display: none;
+    }
+    input:hover + span {
+      background: #ccc;
+    }
+    span {
+      position: absolute;
+      top: -5px;
+      left: 0;
+      height: 25px;
+      width: 25px;
+      background-color: #eee;
+      border-radius: 50%;
+    }
+
+    /* Create the indicator (the dot/circle - hidden when not checked) */
+    span:after {
+      content: '';
+      position: absolute;
+      display: none;
+    }
+
+    /* Show the indicator (dot/circle) when checked */
+    input:checked ~ span:after {
+      display: block;
+    }
+    span:after {
+      top: 9px;
+      left: 9px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #555;
+    }
+  }
+`;
 export const IssueList = styled.ul`
   padding-top: 30px;
-  margin-top: 30px;
+  margin-top: 10px;
   border-top: 1px solid #eee;
   list-style: none;
 

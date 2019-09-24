@@ -23,5 +23,6 @@ module.exports = {
     'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.js'] }],
     'import/prefer-default-export': 'off',
     'react/static-property-placement': 'off',
+    'react/no-did-update-set-state': 0,
   },
 };
