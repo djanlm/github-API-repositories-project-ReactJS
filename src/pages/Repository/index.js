@@ -20,6 +20,7 @@ export default class Repository extends Component {
     issues: [],
     loading: true,
     filter: 'all',
+    pageNumber: 1,
   };
 
   async componentDidMount() {
@@ -47,20 +48,17 @@ export default class Repository extends Component {
   async componentDidUpdate() {
     const { match } = this.props; // match receives parameters
     const repoName = decodeURIComponent(match.params.repository);
-    const { filter } = this.state;
+    const { filter, pageNumber } = this.state;
 
-    const [repository, issues] = await Promise.all([
-      api.get(`/repos/${repoName}`),
-      api.get(`/repos/${repoName}/issues`, {
-        params: {
-          state: `${filter}`,
-          per_page: 5,
-        },
-      }),
-    ]);
+    const issues = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state: `${filter}`,
+        per_page: 5,
+        page: `${pageNumber}`,
+      },
+    });
 
     this.setState({
-      repository: repository.data,
       issues: issues.data,
       loading: false,
     });
@@ -82,8 +80,21 @@ export default class Repository extends Component {
     }
   };
 
+  handleButton = e => {
+    const { pageNumber } = this.state;
+    let page = pageNumber;
+    if (e.target.value === 'prev' && pageNumber > 1) {
+      page -= 1;
+    } else if (e.target.value === 'next') {
+      page += 1;
+    }
+    this.setState({
+      pageNumber: page,
+    });
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, pageNumber } = this.state;
 
     if (loading) {
       return <Loading>Loading...</Loading>;
@@ -98,40 +109,55 @@ export default class Repository extends Component {
           <p>{repository.description}</p>
         </Owner>
         <FilterDiv>
-          <label htmlFor="all">
-            All
-            <input
-              id="all"
-              type="radio"
-              name="filter"
-              value="all"
-              onClick={this.handleFilter}
-              defaultChecked
-            />
-            <span />
-          </label>
-          <label htmlFor="closed">
-            Closed
-            <input
-              id="closed"
-              type="radio"
-              name="filter"
-              value="closed"
-              onClick={this.handleFilter}
-            />
-            <span />
-          </label>
-          <label htmlFor="open">
-            Open
-            <input
-              id="open"
-              type="radio"
-              name="filter"
-              value="open"
-              onClick={this.handleFilter}
-            />
-            <span />
-          </label>
+          <div id="filter">
+            <label htmlFor="all">
+              All
+              <input
+                id="all"
+                type="radio"
+                name="filter"
+                value="all"
+                onClick={this.handleFilter}
+                defaultChecked
+              />
+              <span />
+            </label>
+            <label htmlFor="closed">
+              Closed
+              <input
+                id="closed"
+                type="radio"
+                name="filter"
+                value="closed"
+                onClick={this.handleFilter}
+              />
+              <span />
+            </label>
+            <label htmlFor="open">
+              Open
+              <input
+                id="open"
+                type="radio"
+                name="filter"
+                value="open"
+                onClick={this.handleFilter}
+              />
+              <span />
+            </label>
+          </div>
+          <div>
+            <button
+              type="button"
+              value="prev"
+              disabled={pageNumber < 2}
+              onClick={this.handleButton}
+            >
+              Prev
+            </button>
+            <button type="button" value="next" onClick={this.handleButton}>
+              Next
+            </button>
+          </div>
         </FilterDiv>
         <IssueList>
           {issues.map(issue => (
